@@ -1,0 +1,47 @@
+#Native Graphics Engine library
+
+CC = g++
+CFLAGS= -fPIC -g -c -Wall -std=c++0x
+SOURCES= base.hpp frame_manager.hpp  multi_frame_manager.hpp  transformer.hpp movement.hpp utils.hpp frame_transformer.hpp mynge.hpp
+CFILES= frame_manager.cpp  multi_frame_manager.cpp  transformer.cpp movement.cpp frame_transformer.cpp utils.cpp
+OBJECTS= transformer.o frame_manager.o multi_frame_manager.o movement.o frame_transformer.o utils.o
+MAGICKFLAGS= -DMAGICKCORE_HDRI_ENABLE=0 -DMAGICKCORE_QUANTUM_DEPTH=16
+INCLUDEDIR= /usr/local/include/ImageMagick-6
+
+
+#g++ -fPIC -g -c -DMAGICKCORE_HDRI_ENABLE=0 -DMAGICKCORE_QUANTUM_DEPTH=16 -Wall -I /usr/local/include/ImageMagick-6 transformer.cpp
+#g++ -fPIC -g -c -DMAGICKCORE_HDRI_ENABLE=0 -DMAGICKCORE_QUANTUM_DEPTH=16 -Wall -I /usr/local/include/ImageMagick-6 frame_manager.cpp
+#g++ -fPIC -g -c -DMAGICKCORE_HDRI_ENABLE=0 -DMAGICKCORE_QUANTUM_DEPTH=16 -Wall -I /usr/local/include/ImageMagick-6 multi_frame_manager.cpp
+#g++ -shared -Wl,-soname,libmynge.so -o libmynge.so transformer.o frame_manager.o multi_frame_manager.o -lc
+#g++ -w -DMAGICKCORE_HDRI_ENABLE=0 -DMAGICKCORE_QUANTUM_DEPTH=16 -I/usr/local/include/ImageMagick-6 move_affine.cpp -L. -lmynge `Magick++-config --cppflags --cxxflags --ldflags --libs`
+
+
+#please set LD_LIBRARY_PATH to current directory in case libmynge.so is not found. Weird :(
+all: user_end
+
+user_end: mynge_lib
+	$(CC) -w $(MAGICKFLAGS) -I $(INCLUDEDIR) test_prog4.cpp -L. -lmynge `Magick++-config --cppflags --cxxflags --ldflags --libs`
+
+mynge_lib: $(OBJECTS)
+	$(CC) -shared -Wl,-soname,libmynge.so -o libmynge.so transformer.o movement.o utils.o frame_manager.o frame_transformer.o multi_frame_manager.o -lc
+
+transformer.o:
+	$(CC) $(CFLAGS) $(MAGICKFLAGS) -I $(INCLUDEDIR) transformer.cpp
+
+movement.o:
+	$(CC) $(CFLAGS) $(MAGICKFLAGS) -I $(INCLUDEDIR) movement.cpp
+
+utils.o:
+	$(CC) $(CFLAGS) $(MAGICKFLAGS) -I $(INCLUDEDIR) utils.cpp
+
+frame_manager.o:
+	$(CC) $(CFLAGS) $(MAGICKFLAGS) -I $(INCLUDEDIR) frame_manager.cpp
+
+frame_transformer.o:
+	$(CC) $(CFLAGS) $(MAGICKFLAGS) -I $(INCLUDEDIR) frame_transformer.cpp
+
+multi_frame_manager.o:
+	$(CC) $(CFLAGS) $(MAGICKFLAGS) -I $(INCLUDEDIR) multi_frame_manager.cpp
+
+clean:
+	\rm *.o *.so a.out
